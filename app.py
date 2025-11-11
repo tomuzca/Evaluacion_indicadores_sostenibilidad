@@ -1,4 +1,3 @@
-# app.py — Evaluador de Sostenibilidad Agrícola
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -25,7 +24,7 @@ st.write(
     Este formulario le permitirá registrar las prácticas agrícolas de su predio y obtener un **diagnóstico visual**
     del nivel de sostenibilidad, representado en un gráfico radial.
 
-    Complete las preguntas, y al final podrá **descargar sus resultados** (CSV y gráfico PNG con fecha).
+    Complete las preguntas, y al final podrá **descargar sus resultados** (Excel y gráfico PNG con fecha).
     """
 )
 st.divider()
@@ -162,20 +161,68 @@ if enviado:
     ax.set_title("Nivel de sostenibilidad por dimensión", pad=30)
     st.pyplot(fig)
 
-    # ---- Descargas ----
+    # ---- Función para sanitizar nombres de archivo ----
+    def sanitize_filename(text):
+        """Elimina o reemplaza caracteres no válidos en nombres de archivo"""
+        if not text:
+            return ""
+        # Reemplazar espacios por guiones bajos y eliminar caracteres especiales
+        import re
+        text = text.strip()
+        text = re.sub(r'[^\w\s-]', '', text)
+        text = re.sub(r'[-\s]+', '_', text)
+        return text
+
+    # ---- Construir nombre de archivo ----
     fecha_str = fecha_input.strftime(DATE_FMT)
-    csv_filename = f"evaluacion_{predio or productor or 'predio'}_{fecha_str}.csv"
-    png_filename = f"evaluacion_{predio or productor or 'predio'}_{fecha_str}.png"
+    
+    # Sanitizar nombres
+    productor_clean = sanitize_filename(productor) if productor else ""
+    predio_clean = sanitize_filename(predio) if predio else ""
+    
+    # Construir nombre base del archivo
+    nombre_partes = []
+    if productor_clean:
+        nombre_partes.append(productor_clean)
+    if predio_clean:
+        nombre_partes.append(predio_clean)
+    if not nombre_partes:
+        nombre_partes.append("evaluacion")
+    nombre_partes.append(fecha_str)
+    
+    nombre_base = "_".join(nombre_partes)
+    
+    xlsx_filename = f"{nombre_base}.xlsx"
+    png_filename = f"{nombre_base}.png"
 
-    # CSV
-    out_csv = io.StringIO()
-    resumen.to_csv(out_csv, index=False)
-    st.download_button("📥 Descargar resultados (CSV)", data=out_csv.getvalue(), file_name=csv_filename, mime="text/csv")
+    # ---- Excel (XLSX) ----
+    out_xlsx = io.BytesIO()
+    with pd.ExcelWriter(out_xlsx, engine='openpyxl') as writer:
+        # Crear hoja con información general
+        info_df = pd.DataFrame({
+            'Campo': ['Productor/Agricultor', 'Predio', 'Fecha de Evaluación'],
+            'Valor': [productor or 'No especificado', predio or 'No especificado', fecha_str]
+        })
+        info_df.to_excel(writer, sheet_name='Información', index=False)
+        
+        # Crear hoja con resumen de resultados
+        resumen.to_excel(writer, sheet_name='Resumen por Dimensión', index=False)
+        
+        # Crear hoja con respuestas detalladas
+        df_resp.to_excel(writer, sheet_name='Respuestas Detalladas', index=False)
+    
+    out_xlsx.seek(0)
+    st.download_button(
+        "📥 Descargar resultados (Excel)", 
+        data=out_xlsx.getvalue(), 
+        file_name=xlsx_filename, 
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
-    # PNG
+    # ---- PNG ----
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
     buf.seek(0)
     st.download_button("📷 Descargar gráfico (PNG)", data=buf, file_name=png_filename, mime="image/png")
 
-    st.info("Los archivos incluyen la fecha actual en el nombre.")
+    st.info(f"Los archivos incluyen el nombre del productor, predio y la fecha en el nombre: {nombre_base}")
