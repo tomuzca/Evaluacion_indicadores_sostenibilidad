@@ -88,12 +88,12 @@ df_ind["max_indicador"] = df_ind["parsed_options"].apply(
 dimension_order = df_ind["dimension"].drop_duplicates().tolist()
 
 # ---- Información del usuario ----
-st.subheader("Datos del evaluador")
+st.subheader("Datos del agricultor/a")
 col1, col2, col3 = st.columns(3)
 with col1:
-    productor = st.text_input("Nombre del productor / agricultor")
+    productor = st.text_input("Nombre del agricultor/a")
 with col2:
-    predio = st.text_input("Nombre del predio")
+    predio = st.text_input("Nombre de la finca")
 with col3:
     fecha_input = st.date_input("Fecha de la evaluación", value=datetime.date.today())
 
