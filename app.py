@@ -9,7 +9,7 @@ from matplotlib import cm
 import os
 
 # ---------- CONFIG ----------
-CSV_PATH = os.path.join(os.path.dirname(__file__), "indicadores_sostenibilidad.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "dimensiones-e-indicadores.csv")
 APP_TITLE = "Evaluador de Sostenibilidad Agrícola"
 DATE_FMT = "%Y-%m-%d"
 # ----------------------------
