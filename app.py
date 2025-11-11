@@ -84,6 +84,10 @@ df_ind["max_indicador"] = df_ind["parsed_options"].apply(
     lambda x: max([p for p, _ in x]) if x else 0
 )
 
+# ---- PRESERVAR ORDEN ORIGINAL DE DIMENSIONES ----
+# Crear una lista con el orden original de aparición de las dimensiones
+dimension_order = df_ind["dimension"].drop_duplicates().tolist()
+
 # ---- Información del usuario ----
 st.subheader("Datos del evaluador")
 col1, col2, col3 = st.columns(3)
@@ -102,7 +106,9 @@ st.subheader("Formulario de indicadores")
 responses = {}
 
 with st.form("formulario_indicadores"):
-    for dim, group in df_ind.groupby("dimension"):
+    # Iterar sobre las dimensiones en el orden original del CSV
+    for dim in dimension_order:
+        group = df_ind[df_ind["dimension"] == dim]
         st.markdown(f"### 🌱 {dim}")
         for _, row in group.iterrows():
             opciones = [f"{p} — {t}" for p, t in row["parsed_options"]]
@@ -123,6 +129,10 @@ if enviado:
     maximos = df_ind.groupby("dimension")["max_indicador"].sum().reset_index()
     resumen = subtotal.merge(maximos, on="dimension", how="left")
     resumen["valor_normalizado"] = (resumen["puntaje"] / resumen["max_indicador"]) * 100
+
+    # ---- ORDENAR RESUMEN SEGÚN ORDEN ORIGINAL ----
+    resumen["dimension"] = pd.Categorical(resumen["dimension"], categories=dimension_order, ordered=True)
+    resumen = resumen.sort_values("dimension").reset_index(drop=True)
 
     st.subheader("Resumen por dimensión")
     st.dataframe(resumen)
