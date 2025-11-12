@@ -20,11 +20,10 @@ st.set_page_config(page_title=APP_TITLE, layout="wide")
 st.title(APP_TITLE)
 st.write(
     """
-    Bienvenido/a al **Evaluador de Sostenibilidad Agrícola** 🌿  
-    Este formulario le permitirá registrar las prácticas agrícolas de su predio y obtener un **diagnóstico visual**
-    del nivel de sostenibilidad, representado en un gráfico radial.
+    Bienvenido/a, 🌿
+Este formulario le permitirá evaluar el nivel de sostenibilidad de una finca agrícola y/o pecuaria, obteniendo un diagnóstico visual representado en un gráfico radial.
 
-    Complete las preguntas, y al final podrá **descargar sus resultados** (Excel y gráfico PNG con fecha).
+Califique cada indicador del formulario, y al final podrá descargar sus resultados (Excel y gráfico PNG con fecha).
     """
 )
 st.divider()
