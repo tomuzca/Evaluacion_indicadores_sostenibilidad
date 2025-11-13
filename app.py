@@ -9,7 +9,7 @@ import os
 
 # ---------- CONFIG ----------
 CSV_PATH = os.path.join(os.path.dirname(__file__), "dimensiones.csv")
-APP_TITLE = "Evaluador de Sostenibilidad Agrícola"
+APP_TITLE = "Evaluador de Sostenibilidad A Nivel de Finca"
 DATE_FMT = "%Y-%m-%d"
 # ----------------------------
 
